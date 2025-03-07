@@ -27,7 +27,10 @@ def login():
         elif user[3] == "Adviser":
             return jsonify({"username": username, "role": role, "redirect_url": url_for('adviser')})
         elif user[3] == "Student":
-            return jsonify({"username": username, "role": role, "redirect_url": url_for('student')})
+            id = user[0]
+            cursor.execute("SELECT * FROM students WHERE login_id = ?", (id,))
+            student = cursor.fetchone()
+            return jsonify({"username": username, "role": role, "student_id": student[0], "redirect_url": url_for('student_summary')})
         else:
             flash("Invalid role")
             return redirect(url_for('root'))
@@ -380,6 +383,100 @@ def api_update_payment():
             cursor.execute("UPDATE payments SET status=?, payment_type_id = ?, amount = ?, transaction_completed=? WHERE id=?", (status, payment_type_id, amount, None, id))
         db.commit()
         return jsonify({"status": "success"})
+    except Exception as e:
+        return str(e)
+    
+@app.route("/student_summary")
+def student_summary():
+    return render_template('student_summary.html')
+
+@app.route("/get_student_info", methods=['GET'])
+def get_student_info():
+    try:
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM students WHERE login_id = ?", (request.args.get('login_id'),))
+        student = cursor.fetchone()
+        return jsonify(student)
+    except Exception as e:
+        return str(e)
+    
+    
+@app.route("/api/fetch_payments_student", methods=['GET'])
+def api_fetch_payments_student():
+    try:
+        draw = request.args.get('draw')
+        start = int(request.args.get('start'))
+        length = int(request.args.get('length'))
+        search_value = request.args.get('search[value]')
+        order_column = request.args.get('order[0][column]')
+        order_dir = request.args.get('order[0][dir]')
+        student_id = request.args.get('student_id')
+        
+        columns = ['payments.id', 'payments.transaction_timestamp', 'payment_type.name', 'payments.amount', 'payments.status', 'payments.transaction_completed']
+        order_by = columns[int(order_column)]
+        
+        cursor = db.cursor()
+        
+        # Count total records for the specific student
+        cursor.execute("SELECT COUNT(*) FROM payments WHERE student_id = ?", (student_id,))
+        total_records = cursor.fetchone()[0]
+        
+        # Fetch filtered records
+        if search_value:
+            query = f"""
+                SELECT payments.id, payments.transaction_timestamp, payment_type.name AS payment_type, payments.amount, payments.status, payments.transaction_completed
+                FROM payments
+                INNER JOIN payment_type ON payments.payment_type_id = payment_type.id
+                WHERE student_id = ? AND (payments.id LIKE ? OR payment_type.name LIKE ? OR payments.amount LIKE ? OR payments.status LIKE ? OR payments.transaction_completed LIKE ?)
+                ORDER BY {order_by} {order_dir}
+                LIMIT ? OFFSET ?
+            """
+            cursor.execute(query, (student_id, f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', length, start))
+        else:
+            query = f"""
+                SELECT payments.id, payments.transaction_timestamp, payment_type.name AS payment_type, payments.amount, payments.status, payments.transaction_completed
+                FROM payments
+                INNER JOIN payment_type ON payments.payment_type_id = payment_type.id
+                WHERE payments.student_id = ?
+                ORDER BY {order_by} {order_dir}
+                LIMIT ? OFFSET ?
+            """
+            cursor.execute(query, (student_id, length, start))
+        
+        payments = cursor.fetchall()
+        
+        # Count filtered records
+        if search_value:
+            cursor.execute("""
+                SELECT COUNT(*)
+                FROM payments
+                INNER JOIN payment_type ON payments.payment_type_id = payment_type.id
+                WHERE payments.student_id = ? AND (payments.id LIKE ? OR payment_type.name LIKE ? OR payments.amount LIKE ? OR payments.status LIKE ? OR payments.transaction_completed LIKE ?)
+            """, (student_id, f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%'))
+            filtered_records = cursor.fetchone()[0]
+        else:
+            filtered_records = total_records
+        
+        data = []
+        for payment in payments:
+            data.append({
+                'id': payment[0],
+                'transaction_timestamp': payment[1],
+                'payment_type': payment[2],
+                'amount': payment[3],
+                'status': payment[4],
+                'transaction_completed': payment[5]
+            })
+        
+        response = {
+            'draw': draw,
+            'recordsTotal': total_records,
+            'recordsFiltered': filtered_records,
+            'data': data
+        }
+        print(response)
+        
+        return jsonify(response)
     except Exception as e:
         return str(e)
 

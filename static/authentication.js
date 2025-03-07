@@ -17,6 +17,11 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
       if (data.username && data.role) {
         localStorage.setItem('username', data.username);
         localStorage.setItem('role', data.role);
+
+        if(data.role == "Student") {
+          localStorage.setItem('student_id', data.student_id);
+        }
+
         window.location.href = data.redirect_url;
       }
     })
