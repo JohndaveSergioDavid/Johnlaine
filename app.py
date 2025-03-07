@@ -25,7 +25,10 @@ def login():
         if user[3] == "Administrator":
             return jsonify({"username": username, "role": role, "redirect_url": url_for('admin')})
         elif user[3] == "Adviser":
-            return jsonify({"username": username, "role": role, "redirect_url": url_for('adviser')})
+            id = user[0]
+            cursor.execute("SELECT * FROM adviser WHERE login_id = ?", (id,))
+            student = cursor.fetchone()
+            return jsonify({"username": username, "role": role, "adviser_id": student[0], "redirect_url": url_for('adviser_summary')})
         elif user[3] == "Student":
             id = user[0]
             cursor.execute("SELECT * FROM students WHERE login_id = ?", (id,))
@@ -390,6 +393,10 @@ def api_update_payment():
 def student_summary():
     return render_template('student_summary.html')
 
+@app.route("/adviser_summary")
+def adviser_summary():
+    return render_template('adviser_summary.html')
+
 @app.route("/get_student_info", methods=['GET'])
 def get_student_info():
     try:
@@ -475,6 +482,179 @@ def api_fetch_payments_student():
             'data': data
         }
         print(response)
+        
+        return jsonify(response)
+    except Exception as e:
+        return str(e)
+    
+@app.route("/api/fetch_section_handle", methods=['GET'])
+def api_fetch_section_handle():
+    try:
+        draw = request.args.get('draw')
+        start = int(request.args.get('start'))
+        length = int(request.args.get('length'))
+        search_value = request.args.get('search[value]')
+        order_column = request.args.get('order[0][column]')
+        order_dir = request.args.get('order[0][dir]')
+        adviser_id = request.args.get('adviser_id')
+        
+        columns = ['section.id', 'section.name']
+        order_by = columns[int(order_column)]
+        
+        cursor = db.cursor()
+        
+        # Count total records for the specific adviser
+        cursor.execute("SELECT COUNT(*) FROM section WHERE adviser_id = ?", (adviser_id,))
+        total_records = cursor.fetchone()[0]
+        
+        # Fetch filtered records
+        if search_value:
+            query = f"""
+                SELECT section.id, section.name
+                FROM section
+                WHERE adviser_id = ? AND (section.id LIKE ? OR section.name LIKE ?)
+                ORDER BY {order_by} {order_dir}
+                LIMIT ? OFFSET ?
+            """
+            cursor.execute(query, (adviser_id, f'%{search_value}%', f'%{search_value}%', length, start))
+        else:
+            query = f"""
+                SELECT section.id, section.name
+                FROM section
+                WHERE adviser_id = ?
+                ORDER BY {order_by} {order_dir}
+                LIMIT ? OFFSET ?
+            """
+            cursor.execute(query, (adviser_id, length, start))
+        
+        sections = cursor.fetchall()
+        
+        # Count filtered records
+        if search_value:
+            cursor.execute("""
+                SELECT COUNT(*)
+                FROM section
+                WHERE adviser_id = ? AND (section.id LIKE ? OR section.name LIKE ?)
+            """, (adviser_id, f'%{search_value}%', f'%{search_value}%'))
+            filtered_records = cursor.fetchone()[0]
+        else:
+            filtered_records = total_records
+        
+        data = []
+        for section in sections:
+            data.append({
+                'id': section[0],
+                'name': section[1]
+            })
+        
+        response = {
+            'draw': draw,
+            'recordsTotal': total_records,
+            'recordsFiltered': filtered_records,
+            'data': data
+        }
+        
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+    
+@app.route("/api/adviser_fetch_payments_records", methods=['GET'])
+def adviser_fetch_payments_records():
+    try:
+        draw = request.args.get('draw')
+        start = int(request.args.get('start'))
+        length = int(request.args.get('length'))
+        search_value = request.args.get('search[value]')
+        order_column = request.args.get('order[0][column]')
+        order_dir = request.args.get('order[0][dir]')
+        adviser_id = request.args.get('adviser_id')  # Assuming adviser_id is passed as a query parameter
+        
+        columns = ['payments.id', 'payments.transaction_timestamp', 'payments.student_id', 'students.firstname || " " || students.lastname', 'payment_type.name', 'payments.amount', 'payments.status', 'payments.transaction_completed']
+        order_by = columns[int(order_column)]
+        
+        cursor = db.cursor()
+        
+        # Count total records
+        cursor.execute("""
+            SELECT COUNT(*)
+            FROM payments
+            INNER JOIN students ON payments.student_id = students.id
+            INNER JOIN payment_type ON payments.payment_type_id = payment_type.id
+            INNER JOIN section_info ON section_info.student_id = students.id
+            INNER JOIN section ON section.id = section_info.section_id
+            INNER JOIN adviser ON adviser.id = section.adviser_id
+            WHERE section.adviser_id = ?
+        """, (adviser_id,))
+        total_records = cursor.fetchone()[0]
+        
+        # Fetch filtered records
+        if search_value:
+            query = f"""
+                SELECT payments.id, payments.transaction_timestamp, payments.student_id, students.firstname || ' ' || students.lastname AS name, payment_type.name AS payment_type, payments.amount, payments.status, payments.transaction_completed
+                FROM payments
+                INNER JOIN students ON payments.student_id = students.id
+                INNER JOIN payment_type ON payments.payment_type_id = payment_type.id
+                INNER JOIN section_info ON section_info.student_id = students.id
+                INNER JOIN section ON section.id = section_info.section_id
+                INNER JOIN adviser ON adviser.id = section.adviser_id
+                WHERE section.adviser_id = ? AND (payments.id LIKE ? OR payments.student_id LIKE ? OR students.firstname LIKE ? OR students.lastname LIKE ? OR payment_type.name LIKE ? OR payments.amount LIKE ? OR payments.status LIKE ? OR payments.transaction_completed LIKE ?)
+                ORDER BY {order_by} {order_dir}
+                LIMIT ? OFFSET ?
+            """
+            cursor.execute(query, (adviser_id, f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', length, start))
+        else:
+            query = f"""
+                SELECT payments.id, payments.transaction_timestamp, payments.student_id, students.firstname || ' ' || students.lastname AS name, payment_type.name AS payment_type, payments.amount, payments.status, payments.transaction_completed
+                FROM payments
+                INNER JOIN students ON payments.student_id = students.id
+                INNER JOIN payment_type ON payments.payment_type_id = payment_type.id
+                INNER JOIN section_info ON section_info.student_id = students.id
+                INNER JOIN section ON section.id = section_info.section_id
+                INNER JOIN adviser ON adviser.id = section.adviser_id
+                WHERE section.adviser_id = ?
+                ORDER BY {order_by} {order_dir}
+                LIMIT ? OFFSET ?
+            """
+            cursor.execute(query, (adviser_id, length, start))
+        
+        payments = cursor.fetchall()
+        
+        # Count filtered records
+        if search_value:
+            cursor.execute("""
+                SELECT COUNT(*)
+                FROM payments
+                INNER JOIN students ON payments.student_id = students.id
+                INNER JOIN payment_type ON payments.payment_type_id = payment_type.id
+                INNER JOIN section_info ON section_info.student_id = students.id
+                INNER JOIN section ON section.id = section_info.section_id
+                INNER JOIN adviser ON adviser.id = section.adviser_id
+                WHERE section.adviser_id = ? AND (payments.id LIKE ? OR payments.student_id LIKE ? OR students.firstname LIKE ? OR students.lastname LIKE ? OR payment_type.name LIKE ? OR payments.amount LIKE ? OR payments.status LIKE ? OR payments.transaction_completed LIKE ?)
+            """, (adviser_id, f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%'))
+            filtered_records = cursor.fetchone()[0]
+        else:
+            filtered_records = total_records
+        
+        data = []
+        for payment in payments:
+            data.append({
+                'id': payment[0],
+                'transaction_timestamp': payment[1],
+                'student_id': payment[2],
+                'name': payment[3],
+                'payment_type': payment[4],
+                'amount': payment[5],
+                'status': payment[6],
+                'transaction_completed': payment[7]
+            })
+        
+        response = {
+            'draw': draw,
+            'recordsTotal': total_records,
+            'recordsFiltered': filtered_records,
+            'data': data
+        }
         
         return jsonify(response)
     except Exception as e:

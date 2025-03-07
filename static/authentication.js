@@ -21,6 +21,9 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
         if(data.role == "Student") {
           localStorage.setItem('student_id', data.student_id);
         }
+        else if(data.role == "Adviser") {
+          localStorage.setItem('adviser_id', data.adviser_id);
+        }
 
         window.location.href = data.redirect_url;
       }
