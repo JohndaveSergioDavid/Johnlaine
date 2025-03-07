@@ -7,7 +7,6 @@ $(document).ready(function() {
         url: "/api/count_total_students",
         method: "GET",
         success: function(response) {
-            console.log(response);
             $('#student_total_count').text(response.total_students);
         }
     })
@@ -15,7 +14,6 @@ $(document).ready(function() {
         url: "/api/get_energy_fee",
         method: "GET",
         success: function(response) {
-            console.log(response);
             var energyFee = response.energy_fee;
             if (energyFee === null || energyFee === 0) {
                 energyFee = 0.00;
@@ -33,7 +31,6 @@ $(document).ready(function() {
         url: "/api/get_pending_fees",
         method: "GET",
         success: function(response) {
-            console.log(response);
             var pending_fee = response.pending_fee;
             if (pending_fee === null || pending_fee === 0) {
                 pending_fee = 0.00;
@@ -50,7 +47,6 @@ $(document).ready(function() {
         url: "/api/get_fully_paid_fees",
         method: "GET",
         success: function(response) {
-            console.log(response);
             var full_fee = response.full_fee;
             if (full_fee === null || full_fee === 0) {
                 full_fee = 0.00;

@@ -329,6 +329,59 @@ def get_fully_paid_fees():
         return jsonify({"full_fee": full_fee})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route("/api/get_strand_id", methods=['GET'])
+def api_get_strand_id():
+    try:
+        cursor = db.cursor()
+        cursor.execute("SELECT id FROM strand WHERE name = ?", (request.args.get('strand_name'),))
+        strand_id = cursor.fetchone()[0]
+        return jsonify(strand_id)
+    except Exception as e:
+        return str(e)
+    
+
+@app.route("/api/get_payment_type_id", methods=['GET'])
+def get_payment_type_id():
+    try:
+        cursor = db.cursor()
+        cursor.execute("SELECT id FROM payment_type WHERE name = ?", (request.args.get('payment_type_name'),))
+        payment_type_id = cursor.fetchone()
+        return jsonify(payment_type_id)
+    except Exception as e:
+        return str(e)
+    
+@app.route("/api/get_payment_type_amount", methods=['GET'])
+def get_payment_type_amount():
+    try:
+        cursor = db.cursor()
+        cursor.execute("SELECT amount FROM payment_type WHERE id = ?", (request.args.get('payment_type_id'),))
+        amount = cursor.fetchone()
+        return jsonify(amount)
+    except Exception as e:
+        return str(e)
+    
+    
+@app.route("/api/update_payment", methods=['POST'])
+def api_update_payment():
+    try:
+        id = request.form.get('id')
+        status = request.form.get('status')
+        payment_type_id = request.form.get('payment_type')
+        amount = request.form.get('amount')
+        print(status)
+        print(payment_type_id)
+        print(amount)
+        cursor = db.cursor()
+        if status == "Fully Paid":
+            completed_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            cursor.execute("UPDATE payments SET status=?, payment_type_id = ?, amount = ?, transaction_completed=? WHERE id=?", (status, payment_type_id, amount, completed_date, id))
+        else:
+            cursor.execute("UPDATE payments SET status=?, payment_type_id = ?, amount = ?, transaction_completed=? WHERE id=?", (status, payment_type_id, amount, None, id))
+        db.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return str(e)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)

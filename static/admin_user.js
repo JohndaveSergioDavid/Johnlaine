@@ -2,6 +2,11 @@ $(document).ready(function() {
     var studentTable = $('#student_table').DataTable({
         "processing": true,
         "serverSide": true,
+        ordering: true, // Enable sorting
+        order: [[0, 'asc']], // Set initial sorting (column index 0, ascending)
+        orderFixed: {
+            pre: [[0, 'asc']] // Always apply this sorting first
+        },
         "ajax": {
             "url": "/api/fetch_students_records",
             "type": "GET"
@@ -55,7 +60,6 @@ $(document).ready(function() {
                 password: $('#password').val()
             },
             success: function(response) {
-                console.log(response);
                 $('#student_table').DataTable().ajax.reload();
                 $('#exampleModal').modal('hide');
             },
@@ -65,13 +69,28 @@ $(document).ready(function() {
 
     $('#student_table tbody').on('click', '.edit-btn', function() {
         var data = studentTable.row($(this).parents('tr')).data();
-        console.log(data);
         $('#edit_id').val(data.id);
         $('#edit_lrn').val(data.lrn);
         $('#edit_firstname').val(data.firstname);
         $('#edit_lastname').val(data.lastname);
         $('#edit_email').val(data.email);
-        $('#edit_strand').val(data.strand_id); // Assuming strand_id is available in the data
+
+        var strand = data.strand;
+        $.ajax({
+            url: "/api/get_strand_id",
+            method: "GET",
+            data: {
+                strand_name: strand
+            },
+            success: function(response) {
+                var strandSelect = $("#strandDropdown");
+                strandSelect.append(new Option(strand, response));
+                $('#edit_strand').val(response);
+            },
+            error: function(error) {
+                console.error('Error fetching strand ID:', error);
+            }
+        });
         $('#edit_username').val(data.username);
         $('#edit_password').val('');
         $('#editModal').modal('show');
@@ -90,7 +109,6 @@ $(document).ready(function() {
                 strand_id: $('#edit_strand').val(),
             },
             success: function(response) {
-                console.log(response);
                 $('#student_table').DataTable().ajax.reload();
                 $('#editModal').modal('hide');
             },

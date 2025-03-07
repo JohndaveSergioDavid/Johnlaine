@@ -53,52 +53,88 @@
               <th>Amount Payable</th>
               <th>Status</th>
               <th>Transaction Completed</th>
+              <th>Options</th>
             </tr>
           </thead>
         </table>
       </div>
 
- <!-- Add Payment Modal -->
- <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="addPaymentModalLabel">Add Payment Transaction</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="addPaymentForm">
-          <div class="mb-3">
-            <label for="student_id" class="form-label">Student ID</label>
-            <input type="text" class="form-control" id="student_id" name="student_id" required>
+    <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="addPaymentModalLabel">Add Payment Transaction</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="mb-3">
-            <label for="payment_type" class="form-label">Payment Type</label>
-            <select class="form-control" id="payment_type" name="payment_type" required>
-              <option value="">Select Payment Type</option>
-            </select>
+          <div class="modal-body">
+            <form id="addPaymentForm">
+              <div class="mb-3">
+                <label for="student_id" class="form-label">Student ID</label>
+                <input type="text" class="form-control" id="student_id" name="student_id" required>
+              </div>
+              <div class="mb-3">
+                <label for="payment_type" class="form-label">Payment Type</label>
+                <select class="form-control" id="payment_type" name="payment_type" required>
+                  <option value="">Select Payment Type</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="amount" class="form-label">Amount</label>
+                <input type="number" class="form-control" id="amount" name="amount" readonly required>
+              </div>
+              <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-control" id="status" name="status" required>
+                  <option value="Unpaid">Unpaid</option>
+                  <option value="Fully Paid">Fully Paid</option>
+                </select>
+              </div>
+            </form>
           </div>
-          <div class="mb-3">
-            <label for="amount" class="form-label">Amount</label>
-            <input type="number" class="form-control" id="amount" name="amount" readonly required>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="savePayment">Save changes</button>
           </div>
-          <div class="mb-3">
-            <label for="status" class="form-label">Status</label>
-            <select class="form-control" id="status" name="status" required>
-              <option value="Unpaid">Unpaid</option>
-              <option value="Fully Paid">Fully Paid</option>
-            </select>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" id="savePayment">Save changes</button>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
+    <div class="modal fade" id="editPaymentModal" tabindex="-1" aria-labelledby="editPaymentModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="editPaymentModalLabel">Edit Payment Transaction</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="editPaymentForm">
+              <input type="hidden" id="edit_id" name="id">
+              <div class="mb-3">
+                <label for="edit_payment_type" class="form-label">Payment Type</label>
+                <select class="form-control" id="edit_payment_type" name="payment_type" required>
+                  <option value="">Select Payment Type</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="edit_amount" class="form-label">Amount</label>
+                <input type="number" class="form-control" id="edit_amount" name="amount" readonly required>
+              </div>
+              <div class="mb-3">
+                <label for="edit_status" class="form-label">Status</label>
+                <select class="form-control" id="edit_status" name="status" required>
+                  <option value="Unpaid">Unpaid</option>
+                  <option value="Fully Paid">Fully Paid</option>
+                </select>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="updatePayment">Update changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script src = "{{url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
     <script src = "{{url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
