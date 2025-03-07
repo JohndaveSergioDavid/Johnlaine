@@ -17,7 +17,6 @@ $(document).ready(function() {
                 "data": null,
                 "defaultContent": `
                 <div class = "btn-group">
-                <button class="btn btn-danger btn-sm delete-btn">Delete</button>
                 <button class="btn btn-primary btn-sm edit-btn">Edit</button>
                 <button class="btn btn-dark btn-sm edit-btn">Change Password</button>
                 </div>
