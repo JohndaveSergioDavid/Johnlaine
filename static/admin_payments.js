@@ -18,7 +18,16 @@ $(document).ready(function() {
             { "data": "amount" },
             { "data": "status" },
             { "data": "transaction_completed" },
-        ]
+        ],
+        "createdRow": function(row, data, dataIndex) {
+            if (data.status === 'Fully Paid') {
+                $(row).addClass('table-success');
+            } else if (data.status === 'Partially Paid') {
+                $(row).addClass('table-warning');
+            } else if (data.status === 'Unpaid') {
+                $(row).addClass('table-danger');
+            }
+        }
     });
     $.ajax({
         url: "/api/get_payment_type",

@@ -297,6 +297,38 @@ def api_fetch_payments_records():
         return jsonify(response)
     except Exception as e:
         return str(e)
+    
+@app.route("/api/get_energy_fee", methods=['GET'])
+def api_get_energy_fee():
+    try:
+        cursor = db.cursor()
+        cursor.execute("SELECT SUM(amount) AS total FROM payments WHERE payment_type_id = 1 AND status = 'Fully Paid' GROUP BY payment_type_id;")
+        energy_fee = cursor.fetchone()[0]
+        return jsonify({"energy_fee": energy_fee})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+@app.route("/api/get_pending_fees", methods=['GET'])
+def api_get_pending_fees():
+    try:
+        cursor = db.cursor()
+        cursor.execute("SELECT SUM(amount) AS total FROM payments WHERE status = 'Unpaid' GROUP BY status;")
+        pending_fee = cursor.fetchone()[0]
+        return jsonify({"pending_fee": pending_fee})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+@app.route("/api/get_fully_paid_fees", methods=['GET'])
+def get_fully_paid_fees():
+    try:
+        cursor = db.cursor()
+        cursor.execute("SELECT SUM(amount) AS total FROM payments WHERE status = 'Fully Paid' GROUP BY status;")
+        full_fee = cursor.fetchone()[0]
+        return jsonify({"full_fee": full_fee})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
