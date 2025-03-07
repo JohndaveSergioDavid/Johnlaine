@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href = "{{url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
     <link href = "{{url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.min.css')}}" rel="stylesheet">
+    <link href = "{{url_for('static', filename='node_modules/datatables.net-bs5/css/dataTables.bootstrap5.min.css')}}" rel="stylesheet">
+    <link href = "{{url_for('static', filename='credit-card.png')}}" rel="icon" type = "image/png">
     <title> Admin </title>
   </head>
   <body>
@@ -36,10 +38,74 @@
           </div>
         </div>
       </nav>
+      <div class="container mt-3">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
+          <span class="bi bi-person-plus"></span> Add Transaction
+        </button>
+        <table class="table table-sm table-hover table-bordered table-striped" id="payments_table">
+          <thead>
+            <tr>
+              <th>Transaction ID</th>
+              <th>Timestamp</th>
+              <th>Student ID</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Amount Payable</th>
+              <th>Status</th>
+              <th>Transaction Completed</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+
+ <!-- Add Payment Modal -->
+ <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="addPaymentModalLabel">Add Payment Transaction</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addPaymentForm">
+          <div class="mb-3">
+            <label for="student_id" class="form-label">Student ID</label>
+            <input type="text" class="form-control" id="student_id" name="student_id" required>
+          </div>
+          <div class="mb-3">
+            <label for="payment_type" class="form-label">Payment Type</label>
+            <select class="form-control" id="payment_type" name="payment_type" required>
+              <option value="">Select Payment Type</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="amount" class="form-label">Amount</label>
+            <input type="number" class="form-control" id="amount" name="amount" readonly required>
+          </div>
+          <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-control" id="status" name="status" required>
+              <option value="Unpaid">Unpaid</option>
+              <option value="Partially Paid">Partially Paid</option>
+              <option value="Fully Paid">Fully Paid</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="savePayment">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
     <script src = "{{url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
     <script src = "{{url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
-    <script src = "{{url_for('static', filename='admin.js')}}"></script>
+    <script src = "{{url_for('static', filename='admin_payments.js')}}"></script>
+    <script src="{{url_for('static', filename='node_modules/datatables.net/js/dataTables.min.js')}}"></script>
+    <script src="{{url_for('static', filename='node_modules/datatables.net-bs5/js/dataTables.bootstrap5.min.js')}}"></script>
     <script>
         $('#logout').click(function(){
             localStorage.removeItem('role');

@@ -57,6 +57,7 @@ $(document).ready(function() {
             success: function(response) {
                 console.log(response);
                 $('#student_table').DataTable().ajax.reload();
+                $('#exampleModal').modal('hide');
             },
         })
     });
@@ -64,6 +65,7 @@ $(document).ready(function() {
 
     $('#student_table tbody').on('click', '.edit-btn', function() {
         var data = studentTable.row($(this).parents('tr')).data();
+        console.log(data);
         $('#edit_id').val(data.id);
         $('#edit_lrn').val(data.lrn);
         $('#edit_firstname').val(data.firstname);
@@ -86,8 +88,6 @@ $(document).ready(function() {
                 lastname: $('#edit_lastname').val(),
                 email: $('#edit_email').val(),
                 strand_id: $('#edit_strand').val(),
-                username: $('#edit_username').val(),
-                password: $('#edit_password').val()
             },
             success: function(response) {
                 console.log(response);
