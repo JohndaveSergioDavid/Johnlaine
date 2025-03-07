@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href = "{{url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
+    <link href = "{{url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.min.css')}}" rel="stylesheet">
+    <link href = "{{url_for('static', filename='node_modules/datatables.net-bs5/css/dataTables.bootstrap5.min.css')}}" rel="stylesheet">
+    <title> Admin </title>
+  </head>
+  <body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/admin"> Administrator </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="/admin"> <span class = "bi bi-speedometer"> </span> Dashboard </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link " href="/admin_payments"> <span class = "bi bi-bank2"> </span> Payment Record </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/admin_users"> <span class = "bi bi-person-square"> </span> User Management </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/admin_settings"> <span class = "bi bi-gear"> </span> Settings </a>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" id = "logout"> <span class = "bi bi-arrow-bar-right"> </span> Logout </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <div class = "container mt-3">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          <span class = "bi bi-person-plus"> </span> Add Student Record 
+        </button>
+        <table class = "table table-sm table-striped table-hover table-bordered" id = "student_table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>LRN</th>
+              <th>Firstname</th>
+              <th>Lastname</th>
+              <th>Email</th>
+              <th>Strand</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+
+    <!-- Edit Student Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="editModalLabel">Edit Student Record</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="editStudentForm">
+              <input type="hidden" id="edit_id" name="id">
+              <div class="mb-3">
+                <label for="edit_lrn" class="form-label">LRN</label>
+                <input type="text" class="form-control" id="edit_lrn" name="lrn" required>
+              </div>
+              <div class="mb-3">
+                <label for="edit_firstname" class="form-label">Firstname</label>
+                <input type="text" class="form-control" id="edit_firstname" name="firstname" required>
+              </div>
+              <div class="mb-3">
+                <label for="edit_lastname" class="form-label">Lastname</label>
+                <input type="text" class="form-control" id="edit_lastname" name="lastname" required>
+              </div>
+              <div class="mb-3">
+                <label for="edit_email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="edit_email" name="email" required>
+              </div>
+              <div class="mb-3">
+                <label for="edit_strand" class="form-label">Strand</label>
+                <select class="form-control" id="edit_strand" name="strand" required>
+                  <option value="">Select Strand</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="edit_username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="edit_username" name="username" required>
+              </div>
+              <div class="mb-3">
+                <label for="edit_password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="edit_password" name="password">
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="updateStudent">Update changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Input Required Fields</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form id="addStudentForm">
+                <div class="mb-3">
+                  <label for="lrn" class="form-label">LRN</label>
+                  <input type="text" class="form-control" id="lrn" name="lrn" required>
+                </div>
+                <div class="mb-3">
+                  <label for="firstname" class="form-label">Firstname</label>
+                  <input type="text" class="form-control" id="firstname" name="firstname" required>
+                </div>
+                <div class="mb-3">
+                  <label for="lastname" class="form-label">Lastname</label>
+                  <input type="text" class="form-control" id="lastname" name="lastname" required>
+                </div>
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                  <label for="strand" class="form-label">Strand</label>
+                  <select class="form-control" id="strand" name="strand" required>
+                    <option value="">Select Strand</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="username" class="form-label">Username</label>
+                  <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+                <div class="mb-3">
+                  <label for="password" class="form-label">Password</label>
+                  <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" id="saveStudent">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script src="{{url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
+      <script src="{{url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
+      <script src="{{url_for('static', filename='admin_user.js')}}"></script>
+      <script src="{{url_for('static', filename='node_modules/datatables.net/js/dataTables.min.js')}}"></script>
+      <script src="{{url_for('static', filename='node_modules/datatables.net-bs5/js/dataTables.bootstrap5.min.js')}}"></script>
+      
+    <script>
+        $('#logout').click(function(){
+            localStorage.removeItem('role');
+            localStorage.removeItem('username');
+            window.location.href = '/';
+        });
+    </script>
+  </body>
+</html>
