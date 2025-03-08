@@ -1,4 +1,45 @@
 $(document).ready(function() {
+
+
+        // Fetch data from the backend
+        async function fetchChartData() {
+            const response = await fetch('/generate_chart');
+            const data = await response.json();
+            return data;
+        }
+
+        // Render the chart
+        async function renderChart() {
+            const chartData = await fetchChartData();
+
+            const ctx = document.getElementById('paymentChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',  // You can change this to 'bar', 'pie', etc.
+                data: {
+                    labels: chartData.labels,  // Dates for the X-axis
+                    datasets: [{
+                        label: 'Total Payments (Last 7 Days)',
+                        data: chartData.data,  // Amounts for the Y-axis
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Call the function to render the chart
+        renderChart();
+
+
+
     if(localStorage.getItem('role') !== 'Administrator') {
         window.location.href = '/';
     }

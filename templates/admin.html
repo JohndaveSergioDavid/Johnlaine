@@ -74,10 +74,13 @@
           </div>
         </div>
       </div>
-
+      <div style="width: 75%; margin: auto;">
+        <canvas id="paymentChart"></canvas>
+    </div>
     <script src = "{{url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
     <script src = "{{url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
     <script src = "{{url_for('static', filename='admin.js')}}"></script>
+    <script src="{{url_for('static', filename='node_modules/chart.js/dist/chart.umd.js')}}"></script>
     <script>
         $('#logout').click(function(){
             localStorage.removeItem('role');

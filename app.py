@@ -660,6 +660,38 @@ def adviser_fetch_payments_records():
         return jsonify(response)
     except Exception as e:
         return str(e)
+    
+@app.route("/generate_chart", methods=['GET'])
+def generate_chart():
+    try:
+        cursor = db.cursor()
+        
+        # SQL query to get the sum of payments per day for the last 7 days
+        sql = """
+            SELECT DATE(transaction_completed) AS transaction_date, SUM(amount) AS total_amount
+            FROM payments
+            WHERE status = 'Fully Paid'
+              AND transaction_completed >= DATE('now', '-7 days')
+            GROUP BY DATE(transaction_completed)
+            ORDER BY transaction_date;
+        """
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        
+        # Format data for Chart.js
+        labels = []
+        data = []
+        for row in results:
+            labels.append(row['transaction_date'])  # Dates for the X-axis
+            data.append(row['total_amount'])       # Amounts for the Y-axis
+        
+        # Return data as JSON
+        return jsonify({
+            'labels': labels,
+            'data': data
+        })
+    except Exception as e:
+        return str(e), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
