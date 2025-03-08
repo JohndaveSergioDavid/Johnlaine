@@ -570,7 +570,7 @@ def adviser_fetch_payments_records():
         order_dir = request.args.get('order[0][dir]')
         adviser_id = request.args.get('adviser_id')  # Assuming adviser_id is passed as a query parameter
         
-        columns = ['payments.id', 'payments.transaction_timestamp', 'payments.student_id', 'students.firstname || " " || students.lastname', 'payment_type.name', 'payments.amount', 'payments.status', 'payments.transaction_completed']
+        columns = ['payments.id', 'payments.transaction_timestamp', 'section.name', 'payments.student_id', 'students.firstname || " " || students.lastname', 'payment_type.name', 'payments.amount', 'payments.status', 'payments.transaction_completed']
         order_by = columns[int(order_column)]
         
         cursor = db.cursor()
@@ -591,7 +591,7 @@ def adviser_fetch_payments_records():
         # Fetch filtered records
         if search_value:
             query = f"""
-                SELECT payments.id, payments.transaction_timestamp, payments.student_id, students.firstname || ' ' || students.lastname AS name, payment_type.name AS payment_type, payments.amount, payments.status, payments.transaction_completed
+                SELECT payments.id, payments.transaction_timestamp, section.name, payments.student_id, students.firstname || ' ' || students.lastname AS name, payment_type.name AS payment_type, payments.amount, payments.status, payments.transaction_completed
                 FROM payments
                 INNER JOIN students ON payments.student_id = students.id
                 INNER JOIN payment_type ON payments.payment_type_id = payment_type.id
@@ -605,7 +605,7 @@ def adviser_fetch_payments_records():
             cursor.execute(query, (adviser_id, f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', f'%{search_value}%', length, start))
         else:
             query = f"""
-                SELECT payments.id, payments.transaction_timestamp, payments.student_id, students.firstname || ' ' || students.lastname AS name, payment_type.name AS payment_type, payments.amount, payments.status, payments.transaction_completed
+                SELECT payments.id, payments.transaction_timestamp, section.name, payments.student_id, students.firstname || ' ' || students.lastname AS name, payment_type.name AS payment_type, payments.amount, payments.status, payments.transaction_completed
                 FROM payments
                 INNER JOIN students ON payments.student_id = students.id
                 INNER JOIN payment_type ON payments.payment_type_id = payment_type.id
@@ -641,12 +641,13 @@ def adviser_fetch_payments_records():
             data.append({
                 'id': payment[0],
                 'transaction_timestamp': payment[1],
-                'student_id': payment[2],
-                'name': payment[3],
-                'payment_type': payment[4],
-                'amount': payment[5],
-                'status': payment[6],
-                'transaction_completed': payment[7]
+                'section_name': payment[2],
+                'student_id': payment[3],
+                'name': payment[4],
+                'payment_type': payment[5],
+                'amount': payment[6],
+                'status': payment[7],
+                'transaction_completed': payment[8]
             })
         
         response = {

@@ -29,6 +29,7 @@ $(document).ready(function() {
         "columns": [
             { "data": "id" },
             { "data": "transaction_timestamp" },
+            { "data": "section_name" },
             { "data": "student_id" },
             { "data": "name" },
             { "data": "payment_type" },
